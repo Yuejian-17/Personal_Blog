@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>书月舍 · 清歌</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- 背景层（固定定位） -->
+  <div id="background-layer"></div>
+
+  <!-- 全局导航栏 -->
+  <nav id="global-nav">
+    <span class="nav-title">书月舍 · 清歌</span>
+    <ul class="nav-menu">
+      <li><a href="#/" data-route="/">首页</a></li>
+      <li><a href="#/articles" data-route="/articles">文章</a></li>
+      <li><a href="#/projects" data-route="/projects">项目</a></li>
+      <li><a href="#/music" data-route="/music">音乐</a></li>
+      <li><a href="#/background" data-route="/background">背景</a></li>
+      <li><a href="#/about" data-route="/about">关于</a></li>
+      <li class="nav-user-item" id="nav-user-item">
+        <a href="#/auth" data-route="/auth" id="nav-auth-link">登录</a>
+        <div class="nav-user-dropdown" id="nav-user-dropdown" style="display:none">
+          <div class="nav-user-info">
+            <img class="nav-user-avatar" id="nav-user-avatar" src="" alt="">
+            <div>
+              <div class="nav-user-name" id="nav-user-name"></div>
+              <div class="nav-user-email" id="nav-user-email"></div>
+            </div>
+          </div>
+          <div class="nav-user-menu">
+            <a class="nav-user-menu-item" href="#/account">账户</a>
+            <a class="nav-user-menu-item" href="#/admin" id="nav-admin-link">管理</a>
+            <a class="nav-user-menu-item nav-user-menu-item--logout" href="#" id="nav-logout-btn">退出</a>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- 主视图切换区域 -->
+  <div id="app"></div>
+
+  <!-- 运行时间时钟 -->
+  <div id="clock-container"></div>
+
+  <!-- 第三方库 CDN -->
+  <script src="https://unpkg.com/navigo@8.11.1/lib/navigo.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.0/dist/purify.min.js"></script>
+
+  <!-- 主入口模块 -->
+  <script type="module" src="js/app.js?v=3"></script>
+</body>
+</html>

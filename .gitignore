@@ -1,0 +1,30 @@
+# 环境变量（含敏感凭据）
+.env
+server/.env
+*.env.local
+*.env.*.local
+
+# 依赖
+node_modules/
+server/node_modules/
+
+# 上传的资源文件（用户头像、音乐、背景等）
+assets/images/Profile_Picture/avatar_*
+assets/images/Background_Image/bg_*
+assets/music/upload_*
+
+# 构建/日志
+*.log
+logs/
+dist/
+build/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

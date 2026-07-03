@@ -1,0 +1,20 @@
+[
+  {
+    "name": "Personal Blog",
+    "description": "原生 JavaScript 个人博客，支持 Markdown 编辑、音乐播放、主题切换",
+    "tags": ["JavaScript", "CSS", "HTML"],
+    "url": "https://github.com/user/personal-blog"
+  },
+  {
+    "name": "Todo App",
+    "description": "简洁的待办事项应用，支持离线存储和标签分类",
+    "tags": ["React", "TypeScript"],
+    "url": "https://github.com/user/todo-app"
+  },
+  {
+    "name": "Weather CLI",
+    "description": "命令行天气查询工具，支持多城市对比",
+    "tags": ["Node.js", "CLI"],
+    "url": "https://github.com/user/weather-cli"
+  }
+]
