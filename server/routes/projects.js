@@ -1,4 +1,8 @@
-// 项目路由
+/**
+ * 项目路由
+ * @file 处理项目作品的分页列表、详情、创建、更新、删除
+ * @module server/routes/projects
+ */
 const express = require('express');
 const { body, query, validationResult } = require('express-validator');
 const router = express.Router();
@@ -6,6 +10,12 @@ const pool = require('../db');
 const authMiddleware = require('../middleware/authMiddleware');
 
 // ---- 项目列表 ----
+/**
+ * GET /api/projects
+ * 获取项目列表，支持分页
+ * @param {number} [req.query.page=1] 页码
+ * @param {number} [req.query.limit=10] 每页条数，最大 50
+ */
 router.get('/', [
   query('page').optional().isInt({ min: 1 }).toInt(),
   query('limit').optional().isInt({ min: 1, max: 50 }).toInt(),
@@ -38,6 +48,11 @@ router.get('/', [
 });
 
 // ---- 项目详情 ----
+/**
+ * GET /api/projects/:id
+ * 获取单个项目详情
+ * @param {string} req.params.id 项目 ID
+ */
 router.get('/:id', async (req, res) => {
   try {
     const [projects] = await pool.query(
@@ -55,6 +70,15 @@ router.get('/:id', async (req, res) => {
 });
 
 // ---- 创建项目 ----
+/**
+ * POST /api/projects
+ * 创建新项目（需登录）
+ * @param {string} req.body.title 项目标题
+ * @param {string} req.body.description 项目描述
+ * @param {string} [req.body.tech_stack] 技术栈
+ * @param {string} [req.body.github_url] GitHub 地址
+ * @param {string} [req.body.live_url] 线上演示地址
+ */
 router.post('/', authMiddleware, [
   body('title').trim().notEmpty().withMessage('标题不能为空'),
   body('description').trim().notEmpty().withMessage('描述不能为空'),
@@ -79,6 +103,12 @@ router.post('/', authMiddleware, [
 });
 
 // ---- 更新项目 ----
+/**
+ * PUT /api/projects/:id
+ * 更新指定项目；仅作者本人或管理员可修改
+ * 未提供的字段保持原值不变
+ * @param {string} req.params.id 项目 ID
+ */
 router.put('/:id', authMiddleware, async (req, res) => {
   try {
     const [projects] = await pool.query('SELECT * FROM projects WHERE id = ?', [req.params.id]);
@@ -103,6 +133,11 @@ router.put('/:id', authMiddleware, async (req, res) => {
 });
 
 // ---- 删除项目 ----
+/**
+ * DELETE /api/projects/:id
+ * 删除指定项目；仅作者本人或管理员可删除
+ * @param {string} req.params.id 项目 ID
+ */
 router.delete('/:id', authMiddleware, async (req, res) => {
   try {
     const [projects] = await pool.query('SELECT * FROM projects WHERE id = ?', [req.params.id]);

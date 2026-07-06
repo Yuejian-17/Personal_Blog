@@ -1,15 +1,20 @@
-// LRC 歌词解析器
+/**
+ * LRC 歌词解析工具模块
+ * @file 提供 LRC 格式歌词的解析与当前播放行定位功能
+ * @module js/utils/lrcParser
+ */
 
 /**
- * 解析 LRC 格式歌词
- * @param {string} lrcText
- * @returns {{ time: number, text: string }[]}
+ * 解析 LRC 格式歌词文本
+ * @param {string} lrcText - 原始 LRC 歌词内容
+ * @returns {{ time: number, text: string }[]} 按时间排序的歌词行数组
  */
 function parseLRC(lrcText) {
   if (!lrcText) return [];
   const lines = lrcText.split('\n');
   const result = [];
 
+  // 匹配 [mm:ss.xx] 或 [mm:ss.xxx] 格式的时间标签
   const timeRe = /^\[(\d{2}):(\d{2})(?:\.(\d{2,3}))?\]/;
 
   for (const line of lines) {
@@ -20,6 +25,7 @@ function parseLRC(lrcText) {
     const seconds = parseInt(match[2], 10);
     let ms = 0;
     if (match[3]) {
+      // 将毫秒补齐为 3 位后再转为秒，保证精度一致
       ms = parseInt(match[3].padEnd(3, '0'), 10) / 1000;
     }
     const time = minutes * 60 + seconds + ms;
@@ -35,9 +41,9 @@ function parseLRC(lrcText) {
 
 /**
  * 根据当前播放时间找到对应的歌词行索引
- * @param {{ time: number }[]} lrcData
- * @param {number} currentTime - 秒
- * @returns {number}
+ * @param {{ time: number }[]} lrcData - 已排序的歌词数组
+ * @param {number} currentTime - 当前播放时间（秒）
+ * @returns {number} 当前歌词行索引，无匹配时返回 -1
  */
 function findCurrentLine(lrcData, currentTime) {
   if (!lrcData.length) return -1;

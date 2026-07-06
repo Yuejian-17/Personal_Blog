@@ -1,4 +1,8 @@
-// 背景管理页
+/**
+ * 背景管理页组件
+ * @file 渲染背景图片网格，支持自动轮播开关、手动选择、登录用户导入/删除背景
+ * @module js/pages/backgroundPage
+ */
 
 import { createBackButton } from '../components/backButton.js';
 import { AuthService } from '../utils/authService.js';
@@ -12,6 +16,9 @@ import {
 let _currentBgItem = null;
 let _autoMode = true;
 
+/**
+ * 渲染背景管理页
+ */
 function renderBackgroundPage() {
   console.log('[路由] 背景页');
   const app = document.getElementById('app');
@@ -112,11 +119,20 @@ function renderBackgroundPage() {
   }
 }
 
+/**
+ * 刷新背景网格
+ * @param {boolean} editMode 是否处于编辑模式
+ */
 function refreshGrid(editMode) {
   const grid = document.getElementById('bg-grid');
   if (grid) grid.innerHTML = renderBgGrid(editMode);
 }
 
+/**
+ * 渲染背景图片网格 HTML
+ * @param {boolean} editMode 是否处于编辑模式
+ * @returns {string} HTML 字符串
+ */
 function renderBgGrid(editMode) {
   if (bgImages.length === 0) return '<p class="bg-empty">暂无背景图片</p>';
 
@@ -133,6 +149,9 @@ function renderBgGrid(editMode) {
   }).join('');
 }
 
+/**
+ * 绑定编辑模式下背景删除按钮事件
+ */
 function bindBgDelete() {
   document.querySelectorAll('.bg-item-del').forEach(btn => {
     btn.addEventListener('click', async (e) => {
@@ -165,6 +184,11 @@ function bindBgDelete() {
   });
 }
 
+/**
+ * HTML 属性转义
+ * @param {string} str 原始字符串
+ * @returns {string} 转义后的属性值
+ */
 function escapeAttr(str) {
   return (str || '').replace(/"/g, '&quot;');
 }

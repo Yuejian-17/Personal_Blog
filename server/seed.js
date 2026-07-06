@@ -1,8 +1,17 @@
-// 插入管理员账号（凭据来自 .env）
+/**
+ * 管理员账号种子脚本
+ * @file 从 .env 读取管理员凭据，在数据库中创建唯一的 admin 账号
+ * @module server/seed
+ */
 require('dotenv').config();
 const bcrypt = require('bcrypt');
 const mysql = require('mysql2/promise');
 
+/**
+ * 创建管理员账号
+ * 若邮箱已存在则跳过，避免重复插入
+ * @returns {Promise<void>}
+ */
 async function seedAdmin() {
   const conn = await mysql.createConnection({
     host: process.env.DB_HOST || 'localhost',

@@ -1,9 +1,18 @@
-// 音乐播放器组件
+/**
+ * 音乐播放器组件模块
+ * @file 提供播放列表管理、播放控制、进度拖拽及切歌事件广播的通用音乐播放器
+ * @module js/components/musicPlayer
+ */
 
 class MusicPlayer {
+  /**
+   * 创建音乐播放器组件
+   * @param {string} containerSelector - 播放器挂载容器选择器，默认 '#music-player-container'
+   */
   constructor(containerSelector = '#music-player-container') {
     this.container = document.querySelector(containerSelector);
     if (!this.container) {
+      // 若页面未提供容器，则自动创建并挂载到 body
       this.container = document.createElement('div');
       this.container.id = 'music-player-container';
       document.body.appendChild(this.container);
@@ -19,6 +28,10 @@ class MusicPlayer {
   }
 
   // ---------- 构建 UI ----------
+
+  /**
+   * 构建播放器 HTML 结构并缓存关键 DOM 引用
+   */
   _buildUI() {
     this.container.innerHTML = `
       <audio id="mp-audio" preload="metadata"></audio>
@@ -55,6 +68,10 @@ class MusicPlayer {
   }
 
   // ---------- 绑定事件 ----------
+
+  /**
+   * 绑定播放器面板、控制按钮及音频元素相关事件
+   */
   _bindEvents() {
     this.toggleBtn.addEventListener('click', () => this._togglePanel());
     this.playBtn.addEventListener('click', () => this._togglePlay());
@@ -98,12 +115,20 @@ class MusicPlayer {
   }
 
   // ---------- 面板展开/收起 ----------
+
+  /**
+   * 切换播放器面板的展开/收起状态
+   */
   _togglePanel() {
     this.isExpanded = !this.isExpanded;
     this.panel.classList.toggle('mp-panel--visible', this.isExpanded);
   }
 
   // ---------- 播放/暂停切换（用户点击播放按钮） ----------
+
+  /**
+   * 处理播放按钮点击：首次播放从列表第一首开始，否则切换播放/暂停
+   */
   _togglePlay() {
     if (this.currentIndex === -1 && this.playlist.length > 0) {
       this.play(0);
@@ -123,6 +148,10 @@ class MusicPlayer {
   }
 
   // ---------- 更新进度条 ----------
+
+  /**
+   * 根据音频当前播放时间更新进度条与当前时间显示
+   */
   _updateProgress() {
     if (!this.audio.duration) return;
     const pct = (this.audio.currentTime / this.audio.duration) * 100;
@@ -131,11 +160,21 @@ class MusicPlayer {
   }
 
   // ---------- 更新总时长 ----------
+
+  /**
+   * 音频元数据加载完成后更新总时长显示
+   */
   _updateDuration() {
     this.durationEl.textContent = this._formatTime(this.audio.duration);
   }
 
   // ---------- 格式化时间 ----------
+
+  /**
+   * 将秒数格式化为 mm:ss
+   * @param {number} seconds - 秒数
+   * @returns {string} 格式化后的时间字符串
+   */
   _formatTime(seconds) {
     if (isNaN(seconds)) return '0:00';
     const m = Math.floor(seconds / 60);
@@ -145,7 +184,10 @@ class MusicPlayer {
 
   // ========== 公开方法 ==========
 
-  /** 加载播放列表 */
+  /**
+   * 加载播放列表并初始化到第一首
+   * @param {Object[]} playlist - 歌曲对象数组，每个对象需包含 title、artist、src
+   */
   loadPlaylist(playlist) {
     this.playlist = playlist;
     if (this.playlist.length > 0) {
@@ -154,7 +196,10 @@ class MusicPlayer {
     }
   }
 
-  /** 播放指定索引的歌曲 */
+  /**
+   * 播放指定索引的歌曲
+   * @param {number} index - 歌曲索引
+   */
   play(index) {
     if (index < 0 || index >= this.playlist.length) return;
     this.currentIndex = index;
@@ -162,32 +207,46 @@ class MusicPlayer {
     this._loadTrack(index);
   }
 
-  /** 暂停 */
+  /**
+   * 暂停播放
+   */
   pause() {
     this._shouldPlay = false;
     this.audio.pause();
   }
 
-  /** 下一曲 */
+  /**
+   * 播放下一曲
+   */
   next() {
     if (this.playlist.length === 0) return;
     const idx = (this.currentIndex + 1) % this.playlist.length;
     this.play(idx);
   }
 
-  /** 上一曲 */
+  /**
+   * 播放上一曲
+   */
   prev() {
     if (this.playlist.length === 0) return;
     const idx = (this.currentIndex - 1 + this.playlist.length) % this.playlist.length;
     this.play(idx);
   }
 
-  /** 添加单首歌曲到播放列表 */
+  /**
+   * 添加单首歌曲到播放列表末尾
+   * @param {Object} track - 歌曲对象
+   */
   addTrack(track) {
     this.playlist.push(track);
   }
 
   // ---------- 内部：加载音轨 ----------
+
+  /**
+   * 加载指定索引的音轨到 audio 元素，并广播切歌事件
+   * @param {number} index - 歌曲索引
+   */
   _loadTrack(index) {
     const track = this.playlist[index];
     if (!track) return;
@@ -200,7 +259,7 @@ class MusicPlayer {
     this.currentEl.textContent = '0:00';
     this.durationEl.textContent = '0:00';
 
-    // 广播切歌事件
+    // 广播切歌事件，供首页歌词等外部组件监听
     this.audio.dispatchEvent(new CustomEvent('trackchange', {
       detail: { track, index },
     }));

@@ -1,4 +1,8 @@
-// Express 服务入口
+/**
+ * Express 服务入口
+ * @file 配置中间件、路由挂载、速率限制、CORS、安全头及全局错误处理
+ * @module server/app
+ */
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -17,6 +21,7 @@ const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
 
 app.use(cors({
   origin: (origin, callback) => {
+    // 允许无 origin 的请求（如 curl、Postman）或白名单内的来源
     if (!origin || ALLOWED_ORIGINS.includes(origin)) {
       callback(null, true);
     } else {
@@ -85,6 +90,10 @@ app.use(express.static(path.join(__dirname, '..')));
 const pool = require('./db');
 
 // 健康检查
+/**
+ * GET /api/health
+ * 检查数据库连接是否正常
+ */
 app.get('/api/health', async (req, res) => {
   try {
     await pool.query('SELECT 1');
@@ -113,6 +122,9 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: '服务器内部错误' });
 });
 
+/**
+ * 启动 HTTP 服务并校验数据库连接
+ */
 app.listen(PORT, () => {
   console.log(`服务器已启动: http://localhost:${PORT}`);
   pool.query('SELECT 1')

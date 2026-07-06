@@ -1,10 +1,17 @@
-// 文章编辑器页
+/**
+ * Markdown 文章编辑器页组件
+ * @file 提供文章编辑、实时预览、本地草稿自动保存及发布功能
+ * @module js/pages/editorPage
+ */
 
 import { createBackButton } from '../components/backButton.js';
 import { AuthService } from '../utils/authService.js';
 
 const DRAFT_KEY = 'editor-draft';
 
+/**
+ * 渲染文章编辑器页
+ */
 function renderEditorPage() {
   console.log('[路由] 编辑器');
   const app = document.getElementById('app');
@@ -104,6 +111,9 @@ function renderEditorPage() {
 }
 
 // ---------- 草稿管理 ----------
+/**
+ * 保存当前编辑内容到 sessionStorage 草稿
+ */
 function saveDraft() {
   const title = document.getElementById('editor-title')?.value || '';
   const tags = document.getElementById('editor-tags')?.value || '';
@@ -113,6 +123,10 @@ function saveDraft() {
   sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ title, tags, content }));
 }
 
+/**
+ * 从 sessionStorage 读取草稿
+ * @returns {Object} 草稿对象 { title, tags, content }
+ */
 function loadDraft() {
   try {
     const raw = sessionStorage.getItem(DRAFT_KEY);
@@ -122,6 +136,9 @@ function loadDraft() {
   }
 }
 
+/**
+ * 清除本地草稿
+ */
 function clearDraft() {
   sessionStorage.removeItem(DRAFT_KEY);
 }

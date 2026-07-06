@@ -1,9 +1,19 @@
-// 搜索路由
+/**
+ * 搜索路由
+ * @file 提供文章与项目的关键词搜索，支持按类型过滤
+ * @module server/routes/search
+ */
 const express = require('express');
 const { query, validationResult } = require('express-validator');
 const router = express.Router();
 const pool = require('../db');
 
+/**
+ * GET /api/search
+ * 根据关键词搜索已发布文章与项目
+ * @param {string} req.query.q 搜索关键词
+ * @param {('articles'|'projects'|'all')} [req.query.type='all'] 搜索类型
+ */
 router.get('/', [
   query('q').trim().notEmpty().withMessage('搜索关键词不能为空'),
   query('type').optional().isIn(['articles', 'projects', 'all']),

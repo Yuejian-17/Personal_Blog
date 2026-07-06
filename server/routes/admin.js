@@ -1,4 +1,9 @@
-// 管理员路由
+/**
+ * 管理员路由
+ * @file 提供后台管理接口：用户、文章、项目的全量查询与删除
+ * 所有接口均要求 admin 角色权限
+ * @module server/routes/admin
+ */
 const express = require('express');
 const router = express.Router();
 const pool = require('../db');
@@ -9,6 +14,10 @@ const roleMiddleware = require('../middleware/roleMiddleware');
 router.use(authMiddleware, roleMiddleware('admin'));
 
 // ---- 获取所有用户 ----
+/**
+ * GET /api/admin/users
+ * 获取全量用户列表（不含密码等敏感字段）
+ */
 router.get('/users', async (req, res) => {
   try {
     const [users] = await pool.query(
@@ -22,6 +31,11 @@ router.get('/users', async (req, res) => {
 });
 
 // ---- 删除用户 ----
+/**
+ * DELETE /api/admin/users/:id
+ * 删除指定用户；禁止删除管理员账号
+ * @param {string} req.params.id 用户 ID
+ */
 router.delete('/users/:id', async (req, res) => {
   try {
     const [result] = await pool.query('DELETE FROM users WHERE id = ? AND role != ?', [req.params.id, 'admin']);
@@ -36,6 +50,10 @@ router.delete('/users/:id', async (req, res) => {
 });
 
 // ---- 获取所有文章（含草稿） ----
+/**
+ * GET /api/admin/articles
+ * 获取全量文章列表，包含草稿状态
+ */
 router.get('/articles', async (req, res) => {
   try {
     const [articles] = await pool.query(
@@ -51,6 +69,11 @@ router.get('/articles', async (req, res) => {
 });
 
 // ---- 删除任意文章 ----
+/**
+ * DELETE /api/admin/articles/:id
+ * 删除任意文章（不受作者限制）
+ * @param {string} req.params.id 文章 ID
+ */
 router.delete('/articles/:id', async (req, res) => {
   try {
     await pool.query('DELETE FROM articles WHERE id = ?', [req.params.id]);
@@ -62,6 +85,10 @@ router.delete('/articles/:id', async (req, res) => {
 });
 
 // ---- 获取所有项目 ----
+/**
+ * GET /api/admin/projects
+ * 获取全量项目列表
+ */
 router.get('/projects', async (req, res) => {
   try {
     const [projects] = await pool.query(
@@ -77,6 +104,11 @@ router.get('/projects', async (req, res) => {
 });
 
 // ---- 删除任意项目 ----
+/**
+ * DELETE /api/admin/projects/:id
+ * 删除任意项目（不受作者限制）
+ * @param {string} req.params.id 项目 ID
+ */
 router.delete('/projects/:id', async (req, res) => {
   try {
     await pool.query('DELETE FROM projects WHERE id = ?', [req.params.id]);

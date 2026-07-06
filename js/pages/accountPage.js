@@ -1,8 +1,15 @@
-// 账户页：查看和修改个人资料 + 我的作品
+/**
+ * 个人账户页组件
+ * @file 查看/编辑个人资料、头像裁剪上传、展示并管理当前用户的文章与项目
+ * @module js/pages/accountPage
+ */
 
 import { createBackButton } from '../components/backButton.js';
 import { AuthService } from '../utils/authService.js';
 
+/**
+ * 渲染账户页
+ */
 function renderAccountPage() {
   const app = document.getElementById('app');
 
@@ -140,6 +147,9 @@ function renderAccountPage() {
   });
 }
 
+/**
+ * 加载并显示当前用户资料
+ */
 async function loadProfile() {
   try {
     const user = await AuthService.getMe();
@@ -155,6 +165,9 @@ async function loadProfile() {
   }
 }
 
+/**
+ * 将表单切换为只读状态
+ */
 function setReadOnly() {
   document.getElementById('acc-username').disabled = true;
   document.getElementById('acc-bio').disabled = true;
@@ -166,6 +179,9 @@ function setReadOnly() {
 }
 
 // ---------- 我的作品 ----------
+/**
+ * 加载并渲染当前用户的文章与项目列表
+ */
 async function loadWorks() {
   try {
     const res = await fetch('/api/auth/works', {
@@ -231,6 +247,11 @@ async function loadWorks() {
   }
 }
 
+/**
+ * HTML 转义
+ * @param {string} str 原始字符串
+ * @returns {string} 转义后的字符串
+ */
 function escapeHtml(str) {
   const div = document.createElement('div');
   div.textContent = str || '';
@@ -238,6 +259,11 @@ function escapeHtml(str) {
 }
 
 // ---------- 头像裁剪 ----------
+/**
+ * 打开头像裁剪弹窗
+ * @param {string} src 图片 Data URL
+ * @param {Function} callback 裁剪完成后回调，接收 Blob 参数
+ */
 function openCropModal(src, callback) {
   const old = document.getElementById('crop-modal');
   if (old) old.remove();
@@ -279,6 +305,10 @@ function openCropModal(src, callback) {
 
     const maxSize = Math.min(canvas.width, canvas.height);
 
+    /**
+     * 根据百分比设置裁剪框大小并限制在画布内
+     * @param {number} pct 缩放百分比
+     */
     function setSize(pct) {
       size = Math.round(maxSize * pct / 100);
       cx = Math.max(0, Math.min(cx || (canvas.width - size) / 2, canvas.width - size));
@@ -290,6 +320,9 @@ function openCropModal(src, callback) {
 
     slider.addEventListener('input', () => setSize(parseInt(slider.value)));
 
+    /**
+     * 绘制裁剪预览：暗化原图 + 高亮裁剪区 + 边框与四角
+     */
     function draw() {
       // 背景层：变暗原图
       ctx.globalAlpha = 0.35;

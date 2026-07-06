@@ -1,4 +1,9 @@
-// 媒体 API：音乐、背景、用户配置
+/**
+ * 媒体 API 路由
+ * @file 处理音乐、背景图片、用户设置的查询与上传
+ * 支持系统默认资源与用户私有资源的隔离
+ * @module server/routes/media
+ */
 const express = require('express');
 const router = express.Router();
 const pool = require('../db');
@@ -9,6 +14,10 @@ const authMiddleware = require('../middleware/authMiddleware');
 const authMiddlewareOptional = require('../middleware/authMiddlewareOptional');
 
 // ---- 获取所有音乐（公开，登录后仅看自己+系统默认） ----
+/**
+ * GET /api/media/music
+ * 获取音乐列表：未登录仅返回系统默认音乐，登录用户额外返回自己上传的音乐
+ */
 router.get('/music', authMiddlewareOptional, async (req, res) => {
   try {
     let query, params;
@@ -30,6 +39,10 @@ router.get('/music', authMiddlewareOptional, async (req, res) => {
 });
 
 // ---- 获取所有背景图片（公开，登录后仅看自己+系统默认） ----
+/**
+ * GET /api/media/backgrounds
+ * 获取背景图片列表：未登录仅返回系统默认背景，登录用户额外返回自己上传的背景
+ */
 router.get('/backgrounds', authMiddlewareOptional, async (req, res) => {
   try {
     let query, params;
@@ -48,6 +61,11 @@ router.get('/backgrounds', authMiddlewareOptional, async (req, res) => {
 });
 
 // ---- 获取用户配置（需登录） ----
+/**
+ * GET /api/media/settings
+ * 获取当前登录用户的主题、当前音乐、当前背景等配置
+ * 无记录时返回默认值
+ */
 router.get('/settings', authMiddleware, async (req, res) => {
   try {
     const [rows] = await pool.query(
@@ -63,6 +81,11 @@ router.get('/settings', authMiddleware, async (req, res) => {
 });
 
 // ---- 更新用户配置（需登录） ----
+/**
+ * PUT /api/media/settings
+ * 保存或更新当前用户的主题、当前音乐、当前背景配置
+ * 使用 INSERT ... ON DUPLICATE KEY UPDATE 实现 upsert
+ */
 router.put('/settings', authMiddleware, async (req, res) => {
   const { current_music_id, current_background_id, theme } = req.body;
   try {
@@ -82,6 +105,11 @@ router.put('/settings', authMiddleware, async (req, res) => {
 });
 
 // ---- 删除音乐（需登录，管理员或上传者） ----
+/**
+ * DELETE /api/media/music/:id
+ * 删除指定音乐；仅上传者本人或管理员可删除
+ * @param {string} req.params.id 音乐资源 ID
+ */
 router.delete('/music/:id', authMiddleware, async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT user_id FROM music_files WHERE id = ?', [req.params.id]);
@@ -97,6 +125,11 @@ router.delete('/music/:id', authMiddleware, async (req, res) => {
 });
 
 // ---- 删除背景（需登录，管理员或上传者） ----
+/**
+ * DELETE /api/media/backgrounds/:id
+ * 删除指定背景图片；仅上传者本人或管理员可删除
+ * @param {string} req.params.id 背景图片 ID
+ */
 router.delete('/backgrounds/:id', authMiddleware, async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT user_id FROM background_images WHERE id = ?', [req.params.id]);
@@ -112,6 +145,9 @@ router.delete('/backgrounds/:id', authMiddleware, async (req, res) => {
 });
 
 // ---- 上传音乐（需登录） ----
+/**
+ * multer 存储配置：保存到 assets/music，限制 30MB，仅允许常见音频格式
+ */
 const musicStorage = multer.diskStorage({
   destination: (req, file, cb) => {
     const dir = path.join(__dirname, '..', '..', 'assets', 'music');
@@ -132,6 +168,11 @@ const uploadMusic = multer({
   },
 });
 
+/**
+ * POST /api/media/music
+ * 上传音乐文件并写入数据库（需登录）
+ * @param {File} req.file 音频文件字段名 'music'
+ */
 router.post('/music', authMiddleware, uploadMusic.single('music'), async (req, res) => {
   if (!req.file) return res.status(400).json({ message: '请选择音频文件' });
   const filePath = `assets/music/${req.file.filename}`;
@@ -148,6 +189,9 @@ router.post('/music', authMiddleware, uploadMusic.single('music'), async (req, r
 });
 
 // ---- 上传背景图片（需登录） ----
+/**
+ * multer 存储配置：保存到 assets/images/Background_Image，限制 10MB，仅允许常见图片格式
+ */
 const bgStorage = multer.diskStorage({
   destination: (req, file, cb) => {
     const dir = path.join(__dirname, '..', '..', 'assets', 'images', 'Background_Image');
@@ -168,6 +212,11 @@ const uploadBg = multer({
   },
 });
 
+/**
+ * POST /api/media/backgrounds
+ * 上传背景图片并写入数据库（需登录）
+ * @param {File} req.file 图片文件字段名 'image'
+ */
 router.post('/backgrounds', authMiddleware, uploadBg.single('image'), async (req, res) => {
   if (!req.file) return res.status(400).json({ message: '请选择图片文件' });
   const filePath = `assets/images/Background_Image/${req.file.filename}`;

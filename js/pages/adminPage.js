@@ -1,8 +1,15 @@
-// 管理页：仅管理员可访问
+/**
+ * 后台管理页组件
+ * @file 仅管理员可访问：用户、文章、项目的管理表格与删除操作
+ * @module js/pages/adminPage
+ */
 
 import { createBackButton } from '../components/backButton.js';
 import { AuthService } from '../utils/authService.js';
 
+/**
+ * 渲染后台管理页
+ */
 function renderAdminPage() {
   const app = document.getElementById('app');
 
@@ -40,6 +47,10 @@ function renderAdminPage() {
   loadTab('users');
 }
 
+/**
+ * 加载并渲染指定管理 Tab 的数据
+ * @param {string} tab 类型：users | articles | projects
+ */
 async function loadTab(tab) {
   const wrap = document.getElementById('admin-table-wrap');
   const errEl = document.getElementById('admin-error');
@@ -66,6 +77,11 @@ async function loadTab(tab) {
   }
 }
 
+/**
+ * 渲染用户管理表格
+ * @param {HTMLElement} wrap 表格容器
+ * @param {Object[]} users 用户数组
+ */
 function renderUsers(wrap, users) {
   wrap.innerHTML = `
     <table class="admin-table">
@@ -87,6 +103,11 @@ function renderUsers(wrap, users) {
   bindDeleteButtons(wrap);
 }
 
+/**
+ * 渲染文章管理表格
+ * @param {HTMLElement} wrap 表格容器
+ * @param {Object[]} articles 文章数组
+ */
 function renderArticles(wrap, articles) {
   wrap.innerHTML = `
     <table class="admin-table">
@@ -108,6 +129,11 @@ function renderArticles(wrap, articles) {
   bindDeleteButtons(wrap);
 }
 
+/**
+ * 渲染项目管理表格
+ * @param {HTMLElement} wrap 表格容器
+ * @param {Object[]} projects 项目数组
+ */
 function renderProjects(wrap, projects) {
   wrap.innerHTML = `
     <table class="admin-table">
@@ -128,6 +154,10 @@ function renderProjects(wrap, projects) {
   bindDeleteButtons(wrap);
 }
 
+/**
+ * 绑定管理表格中的删除按钮事件
+ * @param {HTMLElement} wrap 表格容器
+ */
 function bindDeleteButtons(wrap) {
   wrap.querySelectorAll('.admin-del-btn').forEach((btn) => {
     btn.addEventListener('click', async () => {
@@ -153,6 +183,11 @@ function bindDeleteButtons(wrap) {
   });
 }
 
+/**
+ * HTML 转义
+ * @param {string} str 原始字符串
+ * @returns {string} 转义后的字符串
+ */
 function escapeHtml(str) {
   const div = document.createElement('div');
   div.textContent = str || '';

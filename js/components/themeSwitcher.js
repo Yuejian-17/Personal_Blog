@@ -1,6 +1,14 @@
-// 主题切换组件（滑块开关 auto + 圆形按钮日/夜切换）
+/**
+ * 主题切换组件模块
+ * @file 提供 auto / 日间 / 夜间三种模式的主题切换 UI 与逻辑，支持根据时间自动切换
+ * @module js/components/themeSwitcher
+ */
 
 class ThemeSwitcher {
+  /**
+   * 创建主题切换组件
+   * @param {string} buttonContainerSelector - 按钮组挂载容器选择器，默认 '#global-nav'
+   */
   constructor(buttonContainerSelector = '#global-nav') {
     this.mode = localStorage.getItem('blog-theme') || 'auto';
     this.autoTimer = null;
@@ -13,6 +21,11 @@ class ThemeSwitcher {
   }
 
   // ---------- 创建 UI：滑块开关 + 日/夜按钮 ----------
+
+  /**
+   * 在指定容器内创建 auto 滑块开关和日/夜切换按钮
+   * @param {string} selector - 容器选择器
+   */
   _createButtons(selector) {
     const container = document.querySelector(selector);
     if (!container) return;
@@ -45,6 +58,10 @@ class ThemeSwitcher {
   }
 
   // ---------- 应用当前 mode ----------
+
+  /**
+   * 根据当前模式应用主题，并设置自动刷新定时器
+   */
   _applyMode() {
     if (this.autoTimer) {
       clearInterval(this.autoTimer);
@@ -53,6 +70,7 @@ class ThemeSwitcher {
 
     if (this.mode === 'auto') {
       this._applyAutoTheme();
+      // 每小时检查一次时间，确保主题随时间变化
       this.autoTimer = setInterval(() => this._applyAutoTheme(), 60 * 60 * 1000);
     } else {
       this._applyTheme(this.mode);
@@ -63,6 +81,10 @@ class ThemeSwitcher {
   }
 
   // ---------- 日/夜切换 ----------
+
+  /**
+   * 切换日间/夜间模式
+   */
   _toggleDayNight() {
     const isDark = document.body.classList.contains('dark');
 
@@ -76,6 +98,10 @@ class ThemeSwitcher {
   }
 
   // ---------- 自动模式切换 ----------
+
+  /**
+   * 开启或关闭自动主题模式
+   */
   _toggleAuto() {
     if (this.autoInput.checked) {
       this.mode = 'auto';
@@ -88,17 +114,32 @@ class ThemeSwitcher {
   }
 
   // ---------- 设置主题（外部调用） ----------
+
+  /**
+   * 外部设置主题模式
+   * @param {'auto'|'light'|'dark'} mode - 主题模式
+   */
   setTheme(mode) {
     this.mode = mode;
     this._applyMode();
   }
 
   // ---------- 获取当前模式 ----------
+
+  /**
+   * 获取当前主题模式
+   * @returns {'auto'|'light'|'dark'}
+   */
   getCurrentTheme() {
     return this.mode;
   }
 
   // ---------- 应用具体主题 ----------
+
+  /**
+   * 切换 body 的 dark 类以应用浅色或深色主题
+   * @param {'light'|'dark'} theme - 主题
+   */
   _applyTheme(theme) {
     if (theme === 'dark') {
       document.body.classList.add('dark');
@@ -108,6 +149,10 @@ class ThemeSwitcher {
   }
 
   // ---------- 自动模式：6:00-18:00 浅色 ----------
+
+  /**
+   * 根据当前小时自动判断应使用的主题
+   */
   _applyAutoTheme() {
     const hour = new Date().getHours();
     const theme = (hour >= 6 && hour < 18) ? 'light' : 'dark';
@@ -116,6 +161,10 @@ class ThemeSwitcher {
   }
 
   // ---------- 更新 UI 状态 ----------
+
+  /**
+   * 同步滑块开关与日/夜按钮的显示状态
+   */
   _updateUI() {
     const isDark = document.body.classList.contains('dark');
 

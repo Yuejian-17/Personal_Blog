@@ -1,8 +1,15 @@
-// 登录/注册页面
+/**
+ * 登录/注册页面组件
+ * @file 渲染登录与注册表单，处理验证码发送、登录、注册及登录后跳转
+ * @module js/pages/authPage
+ */
 
 import { createBackButton } from '../components/backButton.js';
 import { AuthService } from '../utils/authService.js';
 
+/**
+ * 渲染登录/注册页面
+ */
 function renderAuthPage() {
   const app = document.getElementById('app');
   const tab = window.location.hash.includes('?tab=register') ? 'register' : 'login';
@@ -79,6 +86,9 @@ function renderAuthPage() {
     }
   });
 
+  /**
+   * 更新验证码按钮倒计时
+   */
   function updateCooldown() {
     if (codeCooldown > 0) {
       codeBtn.textContent = `${codeCooldown}s`;

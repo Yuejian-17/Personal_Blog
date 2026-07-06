@@ -1,9 +1,15 @@
-// 首页渲染
+/**
+ * 首页页面组件
+ * @file 渲染首页：搜索框、个人简介、正在播放、推荐文章轮播
+ * @module js/pages/homePage
+ */
 
 import { createBackButton } from '../components/backButton.js';
-import { parseLRC, findCurrentLine } from '../utils/lrcParser.js';
 
-/** 渲染首页 */
+/**
+ * 渲染首页
+ * 优先从后端 API 加载推荐文章，失败时回退到本地 store
+ */
 async function renderHomePage() {
   console.log('[路由] 首页');
   const app = document.getElementById('app');
@@ -55,12 +61,6 @@ async function renderHomePage() {
         </section>
       </div>
 
-      <!-- 歌词 -->
-      <section class="home-section home-lyrics">
-        <h2>歌词</h2>
-        <p class="home-lyrics-text" id="home-lyrics-text">暂无歌词信息</p>
-      </section>
-
       <!-- 文章轮播 -->
       <section class="home-section home-carousel-section">
         <h2>推荐文章</h2>
@@ -95,13 +95,7 @@ async function renderHomePage() {
     musicPlayer.audio.addEventListener('play', updateNowPlaying);
     musicPlayer.audio.addEventListener('pause', updateNowPlaying);
     musicPlayer.audio.addEventListener('ended', updateNowPlaying);
-    musicPlayer.audio.addEventListener('timeupdate', updateLyrics);
     musicPlayer.audio.addEventListener('trackchange', updateNowPlaying);
-  }
-
-  // 初始加载歌词
-  if (musicPlayer && musicPlayer.playlist.length > 0) {
-    updateLyrics();
   }
 
   // 绑定正在播放控制按钮（事件委托）
@@ -125,6 +119,11 @@ async function renderHomePage() {
 // ---------- 文章轮播 ----------
 let _carouselState = { idx: 0, timer: null, max: 0 };
 
+/**
+ * 渲染轮播卡片 HTML
+ * @param {Object[]} articles 文章列表
+ * @returns {string} 拼接后的 HTML 字符串
+ */
 function renderCarouselCards(articles) {
   if (articles.length === 0) {
     return '<p class="home-empty">暂无文章</p>';
@@ -143,6 +142,10 @@ function renderCarouselCards(articles) {
   `).join('');
 }
 
+/**
+ * 启动文章轮播
+ * @param {Object[]} articles 文章列表
+ */
 function startCarousel(articles) {
   const max = Math.min(articles.length, 5);
   _carouselState = { idx: 0, timer: null, max };
@@ -150,6 +153,9 @@ function startCarousel(articles) {
   _bindDotClicks();
 }
 
+/**
+ * 启动自动轮播定时器
+ */
 function _startCarouselTimer() {
   if (_carouselState.timer) clearInterval(_carouselState.timer);
   _carouselState.timer = setInterval(() => {
@@ -157,6 +163,9 @@ function _startCarouselTimer() {
   }, 5000);
 }
 
+/**
+ * 绑定轮播点点击事件
+ */
 function _bindDotClicks() {
   const dotsContainer = document.getElementById('home-carousel-dots');
   if (!dotsContainer) return;
@@ -170,6 +179,10 @@ function _bindDotClicks() {
   });
 }
 
+/**
+ * 切换到指定轮播项并重置定时器
+ * @param {number} index 目标索引
+ */
 function _goToSlide(index) {
   _carouselState.idx = index;
   const cards = document.querySelectorAll('.carousel-card');
@@ -181,6 +194,11 @@ function _goToSlide(index) {
 }
 
 // ---------- 正在播放 ----------
+/**
+ * 渲染“正在播放”区域
+ * @param {Object} mp 音乐播放器实例
+ * @returns {string} HTML 字符串
+ */
 function renderNowPlaying(mp) {
   if (!mp || mp.currentIndex === -1 || !mp.playlist.length) {
     return '<p class="home-empty">未在播放</p>';
@@ -200,6 +218,9 @@ function renderNowPlaying(mp) {
   `;
 }
 
+/**
+ * 更新“正在播放”区域的播放状态与曲目信息
+ */
 function updateNowPlaying() {
   const statusEl = document.getElementById('home-np-status');
   const trackEl = document.getElementById('home-np-track');
@@ -224,52 +245,14 @@ function updateNowPlaying() {
     trackEl.textContent = track.artist ? `${track.title} - ${track.artist}` : track.title;
   }
 
-  // 切歌时更新歌词
-  updateLyrics();
-}
-
-// ---------- 动态歌词 ----------
-let _currentLrcData = [];
-let _lastLrcText = '';
-
-function updateLyrics() {
-  const mp = window.musicPlayer;
-  const el = document.getElementById('home-lyrics-text');
-  if (!el || !mp) return;
-
-  const track = mp.playlist[mp.currentIndex];
-  if (!track) {
-    el.textContent = '暂无歌词信息';
-    return;
-  }
-
-  const lrcText = track.lrc || '';
-  if (!lrcText) {
-    el.textContent = '暂无歌词信息';
-    _currentLrcData = [];
-    return;
-  }
-
-  // 新歌重新解析
-  if (lrcText !== _lastLrcText) {
-    _currentLrcData = parseLRC(lrcText);
-    _lastLrcText = lrcText;
-  }
-
-  if (_currentLrcData.length === 0) {
-    el.textContent = '暂无歌词信息';
-    return;
-  }
-
-  const activeIdx = findCurrentLine(_currentLrcData, mp.audio.currentTime);
-  if (activeIdx >= 0) {
-    el.textContent = _currentLrcData[activeIdx].text;
-  } else {
-    el.textContent = '...';
-  }
 }
 
 // ---------- 工具函数 ----------
+/**
+ * HTML 转义，防止 XSS
+ * @param {string} str 原始字符串
+ * @returns {string} 转义后的 HTML 安全字符串
+ */
 function escapeHtml(str) {
   if (!str) return '';
   const div = document.createElement('div');
@@ -277,6 +260,12 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
+/**
+ * 截断 Markdown 正文为纯文本摘要
+ * @param {string} content Markdown 内容
+ * @param {number} maxLen 最大长度
+ * @returns {string} 摘要文本
+ */
 function truncateContent(content, maxLen) {
   if (!content) return '';
   const plain = content.replace(/[#*`>\-\n]/g, ' ').replace(/\s+/g, ' ').trim();

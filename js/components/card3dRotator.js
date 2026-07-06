@@ -1,14 +1,12 @@
 /**
- * Card3DRotator - 3D 卡片翻转滚动效果
- *
- * 当用户滚动页面时，卡片产生从向后倾斜到直立的 3D 过渡效果。
- * 用法：
- *   const rotator = new Card3DRotator('.al-card');
- *   // 动态添加卡片后调用：rotator.updateCards();
+ * 3D 卡片翻转滚动效果组件模块
+ * @file 监听页面滚动，使卡片从向后倾斜平滑过渡到直立，营造 3D 入场效果
+ * @module js/components/card3dRotator
  */
 
 class Card3DRotator {
   /**
+   * 创建 3D 卡片旋转器
    * @param {string} selector - 卡片元素选择器，默认 '.al-card'
    */
   constructor(selector = '.al-card') {
@@ -25,23 +23,39 @@ class Card3DRotator {
   }
 
   // ---------- 收集卡片元素 ----------
+
+  /**
+   * 收集所有符合选择器的卡片元素
+   */
   _collectCards() {
     this.cards = Array.from(document.querySelectorAll(this.selector));
   }
 
   // ---------- 绑定事件 ----------
+
+  /**
+   * 绑定滚动与resize事件，使用 passive 提升滚动性能
+   */
   _bindEvents() {
     window.addEventListener('scroll', this._onScroll, { passive: true });
     window.addEventListener('resize', this._onScroll, { passive: true });
   }
 
   // ---------- 解绑事件（必要时调用） ----------
+
+  /**
+   * 移除滚动与 resize 监听，释放资源
+   */
   destroy() {
     window.removeEventListener('scroll', this._onScroll);
     window.removeEventListener('resize', this._onScroll);
   }
 
   // ---------- 滚动事件（RAF 节流） ----------
+
+  /**
+   * 滚动事件回调，使用 requestAnimationFrame 节流避免频繁重绘
+   */
   _onScroll() {
     if (!this._ticking) {
       this._ticking = true;
@@ -50,6 +64,10 @@ class Card3DRotator {
   }
 
   // ---------- 更新所有卡片 ----------
+
+  /**
+   * 根据每张卡片在视口中的位置计算并应用旋转角度
+   */
   _update() {
     this._ticking = false;
 
@@ -84,6 +102,10 @@ class Card3DRotator {
   }
 
   // ---------- 手动更新卡片列表（动态添加卡片后调用） ----------
+
+  /**
+   * 重新收集卡片并立即更新一次状态，适用于动态添加卡片后
+   */
   updateCards() {
     this._collectCards();
     this._update();

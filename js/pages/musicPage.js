@@ -1,8 +1,15 @@
-// 音乐页
+/**
+ * 音乐列表页组件
+ * @file 渲染音乐列表，支持搜索、登录用户导入/删除歌曲及播放控制
+ * @module js/pages/musicPage
+ */
 
 import { createBackButton } from '../components/backButton.js';
 import { AuthService } from '../utils/authService.js';
 
+/**
+ * 渲染音乐页
+ */
 function renderMusicPage() {
   console.log('[路由] 音乐页');
   const app = document.getElementById('app');
@@ -89,6 +96,14 @@ function renderMusicPage() {
   bindMusicRefresh(musicPlayer);
 }
 
+/**
+ * 渲染音乐列表 HTML
+ * @param {Object[]} list 音乐列表
+ * @param {Object} musicPlayer 音乐播放器实例
+ * @param {string} query 搜索关键词
+ * @param {boolean} editMode 是否处于编辑模式
+ * @returns {string} HTML 字符串
+ */
 function renderMusicList(list, musicPlayer, query = '', editMode = false) {
   const filtered = query
     ? list.filter(t => t.title.toLowerCase().includes(query.toLowerCase()))
@@ -113,6 +128,10 @@ function renderMusicList(list, musicPlayer, query = '', editMode = false) {
   }).join('');
 }
 
+/**
+ * 绑定音乐项点击切歌事件（事件委托）
+ * @param {Object} musicPlayer 音乐播放器实例
+ */
 function bindMusicClicks(musicPlayer) {
   document.getElementById('mu-list')?.addEventListener('click', (e) => {
     if (e.target.closest('.mu-item-del')) return;
@@ -126,6 +145,9 @@ function bindMusicClicks(musicPlayer) {
   });
 }
 
+/**
+ * 绑定编辑模式下的删除按钮事件
+ */
 function bindDeleteButtons() {
   document.querySelectorAll('.mu-item-del').forEach(btn => {
     btn.addEventListener('click', async (e) => {
@@ -162,6 +184,10 @@ function bindDeleteButtons() {
   });
 }
 
+/**
+ * 绑定播放器事件以刷新列表高亮状态
+ * @param {Object} musicPlayer 音乐播放器实例
+ */
 function bindMusicRefresh(musicPlayer) {
   ['play', 'pause', 'ended', 'trackchange'].forEach(evt => {
     musicPlayer.audio.addEventListener(evt, () => {
@@ -174,6 +200,11 @@ function bindMusicRefresh(musicPlayer) {
   });
 }
 
+/**
+ * HTML 转义
+ * @param {string} str 原始字符串
+ * @returns {string} 转义后的字符串
+ */
 function escapeHtml(str) {
   if (!str) return '';
   const div = document.createElement('div');

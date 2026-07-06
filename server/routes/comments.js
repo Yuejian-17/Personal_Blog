@@ -1,4 +1,8 @@
-// 评论路由
+/**
+ * 评论路由
+ * @file 处理文章评论的查询、创建、删除，支持最多两层嵌套回复
+ * @module server/routes/comments
+ */
 const express = require('express');
 const { body, validationResult } = require('express-validator');
 const router = express.Router();
@@ -6,6 +10,11 @@ const pool = require('../db');
 const authMiddleware = require('../middleware/authMiddleware');
 
 // ---- 获取某篇文章的评论（平铺返回，前端组装树形） ----
+/**
+ * GET /api/articles/:articleId/comments
+ * 获取指定文章下的所有评论，按时间正序平铺返回
+ * @param {string} req.params.articleId 文章 ID
+ */
 router.get('/articles/:articleId/comments', async (req, res) => {
   try {
     const [comments] = await pool.query(
@@ -24,6 +33,14 @@ router.get('/articles/:articleId/comments', async (req, res) => {
 });
 
 // ---- 创建评论（需登录，最多两层） ----
+/**
+ * POST /api/articles/:articleId/comments
+ * 在指定文章下发表评论；parent_id 为回复目标评论 ID
+ * 若回复的是子评论，则自动扁平化为回复其祖父评论，并在内容前标注被回复者
+ * @param {string} req.params.articleId 文章 ID
+ * @param {string} req.body.content 评论内容
+ * @param {number} [req.body.parent_id] 父评论 ID
+ */
 router.post('/articles/:articleId/comments', authMiddleware, [
   body('content').trim().notEmpty().withMessage('评论内容不能为空')
     .isLength({ max: 5000 }).withMessage('评论内容最多 5000 字'),
@@ -75,6 +92,12 @@ router.post('/articles/:articleId/comments', authMiddleware, [
 });
 
 // ---- 删除评论（作者或 admin，级联删除子评论） ----
+/**
+ * DELETE /api/comments/:id
+ * 删除指定评论；仅评论作者或管理员可删除
+ * 会递归删除该评论下的所有子评论
+ * @param {string} req.params.id 评论 ID
+ */
 router.delete('/comments/:id', authMiddleware, async (req, res) => {
   try {
     const [comments] = await pool.query('SELECT * FROM comments WHERE id = ?', [req.params.id]);
@@ -96,7 +119,12 @@ router.delete('/comments/:id', authMiddleware, async (req, res) => {
   }
 });
 
-/** 递归删除评论树 */
+/**
+ * 递归删除评论树
+ * @param {number} commentId 待删除的评论 ID
+ * @param {Object} conn 数据库连接或连接池，用于执行查询
+ * @returns {Promise<void>}
+ */
 async function deleteCommentTree(commentId, conn) {
   // 查找所有直接子评论
   const [children] = await conn.query('SELECT id FROM comments WHERE parent_id = ?', [commentId]);

@@ -1,4 +1,8 @@
-// 文章详情页：Markdown渲染 + 评论 + 权限UI
+/**
+ * 文章详情页组件
+ * @file 渲染 Markdown 文章正文、作者信息、权限操作按钮及评论树
+ * @module js/pages/articleDetailPage
+ */
 
 import { createBackButton } from '../components/backButton.js';
 import { AuthService } from '../utils/authService.js';
@@ -14,6 +18,10 @@ const GISCUS_CONFIG = {
   categoryId: 'DIC_kwDOxxxxx',
 };
 
+/**
+ * 渲染文章详情页
+ * @param {string} id 文章 ID
+ */
 async function renderArticleDetailPage(id) {
   console.log('[路由] 文章详情, id:', id);
   const app = document.getElementById('app');
@@ -145,6 +153,10 @@ async function renderArticleDetailPage(id) {
 }
 
 // ---------- 评论加载 ----------
+/**
+ * 加载并渲染指定文章的评论树
+ * @param {string} articleId 文章 ID
+ */
 async function loadComments(articleId) {
   const list = document.getElementById('cmt-list');
   if (!list) return;
@@ -166,6 +178,11 @@ async function loadComments(articleId) {
   }
 }
 
+/**
+ * 将平铺评论列表组装为树形结构
+ * @param {Object[]} comments 平铺评论数组
+ * @returns {Object[]} 顶层评论树
+ */
 function buildCommentTree(comments) {
   const map = {};
   const roots = [];
@@ -182,6 +199,13 @@ function buildCommentTree(comments) {
   return roots;
 }
 
+/**
+ * 递归渲染评论树 HTML
+ * @param {Object[]} nodes 评论节点数组
+ * @param {string} articleId 文章 ID
+ * @param {number} depth 当前嵌套深度
+ * @returns {string} HTML 字符串
+ */
 function renderCommentTree(nodes, articleId, depth = 0) {
   return nodes.map(c => `
     <div class="cmt-item" style="margin-left:${depth * 24}px" data-id="${c.id}">
@@ -202,6 +226,10 @@ function renderCommentTree(nodes, articleId, depth = 0) {
   `).join('');
 }
 
+/**
+ * 绑定回复、删除、发送回复按钮事件
+ * @param {string} articleId 文章 ID
+ */
 function bindReplyButtons(articleId) {
   document.querySelectorAll('.cmt-reply-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -247,6 +275,11 @@ function bindReplyButtons(articleId) {
 }
 
 // ---------- 工具函数 ----------
+/**
+ * HTML 转义
+ * @param {string} str 原始字符串
+ * @returns {string} 转义后的字符串
+ */
 function escapeHtml(str) {
   if (!str) return '';
   const div = document.createElement('div');
@@ -254,6 +287,11 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
+/**
+ * HTML 属性转义
+ * @param {string} str 原始字符串
+ * @returns {string} 转义后的属性值
+ */
 function escapeAttr(str) {
   return (str || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }

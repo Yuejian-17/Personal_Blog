@@ -1,4 +1,8 @@
-// 用户认证路由
+/**
+ * 用户认证路由
+ * @file 处理用户注册、登录、验证码、个人资料及当前用户作品查询
+ * @module server/routes/auth
+ */
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -22,6 +26,10 @@ const transporter = nodemailer.createTransport({
 // ---- 内存验证码存储（生产环境建议用 Redis） ----
 const codeStore = new Map(); // key: email, value: { code, expires, lastSent }
 
+/**
+ * 生成 6 位数字验证码
+ * @returns {string} 6 位密码学安全随机数字字符串
+ */
 function generateCode() {
   return String(require('crypto').randomInt(100000, 1000000)); // 6位密码学安全随机数
 }
@@ -29,6 +37,11 @@ function generateCode() {
 // ==========================================
 // 2.3 发送邮箱验证码
 // ==========================================
+/**
+ * POST /api/auth/send-email-code
+ * 向指定邮箱发送注册验证码，限制 60 秒内重复发送，验证码 5 分钟有效
+ * 已注册邮箱会静默返回成功，防止邮箱枚举攻击
+ */
 router.post('/send-email-code', [
   body('email').isEmail().withMessage('请输入有效的邮箱地址'),
 ], async (req, res) => {
@@ -85,6 +98,11 @@ router.post('/send-email-code', [
 // ==========================================
 // 2.1 注册（含验证码校验）
 // ==========================================
+/**
+ * POST /api/auth/register
+ * 用户注册接口：校验验证码、唯一性、密码强度后写入用户表
+ * 普通用户默认 role 为 'user'
+ */
 router.post('/register', [
   body('username').trim().notEmpty().withMessage('昵称不能为空')
     .isLength({ max: 50 }).withMessage('昵称最长 50 个字符'),
@@ -148,6 +166,11 @@ router.post('/register', [
 // ==========================================
 // 2.2 登录
 // ==========================================
+/**
+ * POST /api/auth/login
+ * 用户登录：校验邮箱密码，签发 2 小时有效的 JWT
+ * @returns {Object} 包含 token 与当前用户基本信息
+ */
 router.post('/login', [
   body('email').isEmail().withMessage('请输入有效的邮箱地址'),
   body('password').notEmpty().withMessage('请输入密码'),
@@ -200,6 +223,10 @@ router.post('/login', [
 // ==========================================
 // 2.7 获取当前用户信息
 // ==========================================
+/**
+ * GET /api/auth/me
+ * 获取当前登录用户的完整资料（需认证）
+ */
 router.get('/me', authMiddleware, async (req, res) => {
   try {
     const [users] = await pool.query(
@@ -219,6 +246,11 @@ router.get('/me', authMiddleware, async (req, res) => {
 // ==========================================
 // 更新个人资料
 // ==========================================
+/**
+ * PUT /api/auth/profile
+ * 更新当前用户的昵称、简介或头像（需认证）
+ * 仅允许更新白名单字段，防止恶意修改敏感列
+ */
 router.put('/profile', authMiddleware, [
   body('username').optional().trim().notEmpty().isLength({ max: 50 }),
   body('bio').optional().trim(),
@@ -263,6 +295,10 @@ router.put('/profile', authMiddleware, [
 // ==========================================
 // 获取当前用户的文章和项目
 // ==========================================
+/**
+ * GET /api/auth/works
+ * 获取当前登录用户发布的文章与项目列表（需认证）
+ */
 router.get('/works', authMiddleware, async (req, res) => {
   try {
     const [articles] = await pool.query(
